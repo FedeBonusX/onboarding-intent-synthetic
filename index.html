@@ -1,0 +1,1615 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Onboarding Intent - Prototype</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700;1,9..40,400&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #e8e8e8;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 0;
+      margin: 0;
+    }
+
+    .phone-frame {
+      width: 360px;
+      height: 100vh;
+      max-height: 100vh;
+      background: white;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* On larger screens, show as a phone mockup centered */
+    @media (min-height: 500px) and (min-width: 400px) {
+      body {
+        padding: 20px 0;
+        align-items: center;
+      }
+      .phone-frame {
+        height: min(800px, calc(100vh - 40px));
+        border-radius: 24px;
+        box-shadow: 0 8px 32px rgba(0,0,0,0.12);
+      }
+    }
+
+    /* On mobile / small screens, go full screen */
+    @media (max-width: 399px) {
+      .phone-frame {
+        width: 100vw;
+        height: 100vh;
+        border-radius: 0;
+        box-shadow: none;
+      }
+    }
+
+    /* Modal Bar */
+    .modal-bar {
+      flex-shrink: 0;
+      z-index: 2;
+    }
+
+    .modal-bar-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px;
+      border-bottom: 1px solid #cbcfda;
+      background: white;
+    }
+
+    .modal-bar-title {
+      font-weight: 700;
+      font-size: 16px;
+      line-height: 28px;
+      color: #171f36;
+      letter-spacing: 0.15px;
+      padding-left: 4px;
+    }
+
+    .close-btn {
+      width: 40px;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      background: none;
+      cursor: pointer;
+      border-radius: 999px;
+      font-size: 18px;
+      color: #171f36;
+    }
+    .close-btn:hover { background: rgba(23,31,54,0.05); }
+
+    /* Progress Bar */
+    .progress-bar {
+      height: 8px;
+      background: #f1f4fc;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      background: #5acd9e;
+      transition: width 0.4s ease;
+    }
+
+    /* Body */
+    .body-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 32px 16px calc(120px + env(safe-area-inset-bottom, 0px)) 16px;
+      background: white;
+      z-index: 1;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .body-content::-webkit-scrollbar { display: none; }
+
+    /* Typography */
+    .question-title {
+      font-weight: 700;
+      font-size: 20px;
+      line-height: 32px;
+      color: #171f36;
+      margin-bottom: 4px;
+    }
+
+    .question-subtitle {
+      font-weight: 400;
+      font-size: 16px;
+      line-height: 21px;
+      color: #171f36;
+      letter-spacing: 0.15px;
+      margin-bottom: 0;
+    }
+
+    .question-header {
+      margin-bottom: 24px;
+    }
+
+    .question-header-with-help {
+      display: flex;
+      align-items: flex-start;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .help-btn {
+      flex-shrink: 0;
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      background: #f8f7fe;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: #6b5ce7;
+    }
+
+    /* Option Cards */
+    .options-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .option-card {
+      display: flex;
+      align-items: center;
+      min-width: 220px;
+      padding: 4px 12px;
+      border-radius: 12px;
+      border: 1px solid rgba(23,31,54,0.1);
+      background: white;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      min-height: 52px;
+    }
+
+    .option-card:hover {
+      border-color: rgba(23,31,54,0.2);
+      background: #fafafa;
+    }
+
+    .option-card.selected {
+      background: #f9fafa;
+      border-color: rgba(23,31,54,0.3);
+    }
+
+    .option-card-inner {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 0;
+      flex: 1;
+    }
+
+    .option-icon {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      font-size: 16px;
+      flex-shrink: 0;
+    }
+
+    .option-check {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      display: none;
+    }
+
+    .option-card.selected .option-check {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .check-icon {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #1246c8;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .check-icon svg {
+      width: 10px;
+      height: 10px;
+      fill: white;
+    }
+
+    .option-text {
+      font-weight: 700;
+      font-size: 16px;
+      line-height: 28px;
+      color: #171f36;
+      letter-spacing: 0.15px;
+      flex: 1;
+    }
+
+    .option-help {
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      background: #f9fafa;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: rgba(23,31,54,0.5);
+      flex-shrink: 0;
+    }
+
+    /* Search Field */
+    .search-field {
+      display: flex;
+      align-items: center;
+      border: 1px solid rgba(23,31,54,0.12);
+      border-radius: 8px;
+      padding: 12px;
+      margin-bottom: 24px;
+      gap: 8px;
+      background: white;
+    }
+
+    .search-field svg {
+      width: 24px;
+      height: 24px;
+      color: rgba(23,31,54,0.5);
+      flex-shrink: 0;
+    }
+
+    .search-field input {
+      border: none;
+      outline: none;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      line-height: 21px;
+      color: #171f36;
+      letter-spacing: 0.15px;
+      flex: 1;
+      background: transparent;
+    }
+
+    .search-field input::placeholder {
+      color: rgba(23,31,54,0.7);
+    }
+
+    /* Country List */
+    .country-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      padding: 4px;
+      max-height: 470px;
+      overflow-y: auto;
+    }
+
+    .country-list::-webkit-scrollbar { display: none; }
+
+    .country-item {
+      display: flex;
+      align-items: center;
+      padding: 8px 12px;
+      border-radius: 12px;
+      cursor: pointer;
+      gap: 8px;
+      min-height: 52px;
+      transition: all 0.15s ease;
+    }
+
+    .country-item:hover { background: #fafafa; }
+
+    .country-item.selected {
+      background: #f9fafa;
+      border: 1px solid rgba(23,31,54,0.3);
+    }
+
+    .country-item:not(.selected) {
+      border: 1px solid transparent;
+    }
+
+    .country-flag {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .country-name {
+      font-weight: 700;
+      font-size: 16px;
+      line-height: 28px;
+      color: #171f36;
+      letter-spacing: 0.15px;
+      flex: 1;
+    }
+
+    .country-check {
+      display: none;
+    }
+
+    .country-item.selected .country-check {
+      display: flex;
+    }
+
+    /* Number Input */
+    .number-input-container {
+      margin-top: 24px;
+    }
+
+    .number-input {
+      width: 100%;
+      border: 1px solid rgba(23,31,54,0.12);
+      border-radius: 8px;
+      padding: 16px 12px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      line-height: 21px;
+      color: #171f36;
+      letter-spacing: 0.15px;
+      outline: none;
+      background: white;
+    }
+
+    .number-input:focus {
+      border-color: #1246c8;
+    }
+
+    /* Buttons Footer */
+    .buttons-footer {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      display: flex;
+      gap: 8px;
+      padding: 16px 16px calc(24px + env(safe-area-inset-bottom, 0px)) 16px;
+      background: white;
+      z-index: 3;
+    }
+
+    .btn {
+      flex: 1;
+      min-height: 48px;
+      min-width: 80px;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-weight: 500;
+      font-size: 15px;
+      line-height: 26px;
+      letter-spacing: 0.46px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 8px 16px;
+      transition: all 0.15s ease;
+    }
+
+    .btn-back {
+      background: white;
+      color: #1246c8;
+      border: 1px solid rgba(18,70,200,0.5);
+    }
+    .btn-back:hover { background: rgba(18,70,200,0.04); }
+
+    .btn-next {
+      background: #1246c8;
+      color: white;
+      border: none;
+    }
+    .btn-next:hover { background: #0f3da8; }
+
+    .btn-next.disabled {
+      background: rgba(23,31,54,0.12);
+      color: rgba(23,31,54,0.24);
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    .btn-icon {
+      font-size: 14px;
+    }
+
+    /* Step hidden by default */
+    .step { display: none; flex-direction: column; height: 100%; }
+    .step.active { display: flex; }
+
+    /* Animations */
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(30px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes slideOut {
+      from { opacity: 1; transform: translateX(0); }
+      to { opacity: 0; transform: translateX(-30px); }
+    }
+
+    .step.active .body-content {
+      animation: slideIn 0.3s ease;
+    }
+  </style>
+</head>
+<body>
+
+<div class="phone-frame" id="app">
+
+  <!-- STEP 99: Intent Selection (last question before done) -->
+  <div class="step" data-step="99">
+    <div class="modal-bar">
+      <div class="modal-bar-header">
+        <span class="modal-bar-title">Su di te</span>
+        <button class="close-btn">&times;</button>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:90%"></div></div>
+    </div>
+    <div class="body-content">
+      <div class="question-header">
+        <h2 class="question-title" id="intent-title">Ti interessa qualcosa in particolare?</h2>
+      </div>
+      <div class="options-list" data-single="true">
+        <div class="option-card" data-value="isee">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <div class="option-icon">&#128278;</div>
+            <span class="option-text">ISEE</span>
+          </div>
+        </div>
+        <div class="option-card" data-value="naspi">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <div class="option-icon">&#128188;</div>
+            <span class="option-text">Disoccupazione (NASpl)</span>
+          </div>
+        </div>
+        <div class="option-card" data-value="family">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <div class="option-icon">&#128106;</div>
+            <span class="option-text">Bonus per la famiglia</span>
+          </div>
+        </div>
+        <div class="option-card" data-value="complete">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <div class="option-icon">&#128100;</div>
+            <span class="option-text">Completare i dati per trovare i bonus per me</span>
+          </div>
+        </div>
+        <div class="option-card" data-value="explore">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <div class="option-icon">&#129300;</div>
+            <span class="option-text">Voglio esplorare</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="buttons-footer">
+      <button class="btn btn-back" data-action="back">
+        <span class="btn-icon">&#8249;</span> Indietro
+      </button>
+      <button class="btn btn-next disabled" data-action="next">
+        Avanti <span class="btn-icon">&#8250;</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 1: Cittadinanza (FIRST STEP) -->
+  <div class="step active" data-step="1">
+    <div class="modal-bar">
+      <div class="modal-bar-header">
+        <span class="modal-bar-title">Su di te</span>
+        <button class="close-btn">&times;</button>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:20%"></div></div>
+    </div>
+    <div class="body-content">
+      <div class="question-header">
+        <h2 class="question-title">Cittadinanza</h2>
+        <p class="question-subtitle">Hai la cittadinanza in piu Stati? Puoi selezionarne piu di uno.</p>
+      </div>
+      <div class="search-field">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Cerca" id="search-country">
+      </div>
+      <div class="country-list" id="country-list" data-multi="true">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+    <div class="buttons-footer">
+      <button class="btn btn-back" style="visibility:hidden">
+        <span class="btn-icon">&#8249;</span> Indietro
+      </button>
+      <button class="btn btn-next disabled" data-action="next">
+        Avanti <span class="btn-icon">&#8250;</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 2: Paese di residenza -->
+  <div class="step" data-step="2">
+    <div class="modal-bar">
+      <div class="modal-bar-header">
+        <span class="modal-bar-title">Su di te</span>
+        <button class="close-btn">&times;</button>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:40%"></div></div>
+    </div>
+    <div class="body-content">
+      <div class="question-header">
+        <h2 class="question-title">Paese di residenza</h2>
+      </div>
+      <div class="search-field">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Cerca" id="search-residence">
+      </div>
+      <div class="country-list" id="residence-list" data-multi="false">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+    <div class="buttons-footer">
+      <button class="btn btn-back" data-action="back">
+        <span class="btn-icon">&#8249;</span> Indietro
+      </button>
+      <button class="btn btn-next disabled" data-action="next">
+        Avanti <span class="btn-icon">&#8250;</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 3: Comune di residenza -->
+  <div class="step" data-step="3">
+    <div class="modal-bar">
+      <div class="modal-bar-header">
+        <span class="modal-bar-title">Su di te</span>
+        <button class="close-btn">&times;</button>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:40%"></div></div>
+    </div>
+    <div class="body-content">
+      <div class="question-header">
+        <h2 class="question-title">Comune di residenza</h2>
+        <p class="question-subtitle">Scegli il comune, non la frazione.<br>Ad esempio: Milano (non Niguarda).</p>
+      </div>
+      <div class="search-field">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" placeholder="Cerca il Comune" id="search-comune" autocomplete="off">
+      </div>
+      <!-- Empty state -->
+      <div id="comune-empty-state" style="display:flex;flex-direction:column;align-items:center;gap:16px;padding-top:24px;">
+        <div style="width:48px;height:48px;display:flex;align-items:center;justify-content:center;">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <circle cx="20" cy="20" r="12" stroke="#5acd9e" stroke-width="3" fill="rgba(90,205,158,0.12)"/>
+            <line x1="29" y1="29" x2="40" y2="40" stroke="#5acd9e" stroke-width="3" stroke-linecap="round"/>
+            <line x1="14" y1="20" x2="26" y2="20" stroke="#5acd9e" stroke-width="2.5" stroke-linecap="round"/>
+            <line x1="16" y1="25" x2="24" y2="25" stroke="#5acd9e" stroke-width="2.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <p style="font-size:16px;line-height:21px;color:rgba(23,31,54,0.7);text-align:center;letter-spacing:0.15px;">Inizia a digitare per cercare</p>
+      </div>
+      <!-- Selected comune display -->
+      <div id="comune-selected" style="display:none;">
+        <div class="country-item selected" style="border:1px solid rgba(23,31,54,0.3);background:#f9fafa;border-radius:12px;display:flex;align-items:center;padding:8px 12px;gap:8px;cursor:pointer;">
+          <div class="country-check" style="display:flex;">
+            <div class="check-icon"><svg viewBox="0 0 24 24" style="width:10px;height:10px;fill:white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+          </div>
+          <span class="country-name" id="comune-selected-name" style="font-weight:700;font-size:16px;line-height:28px;color:#171f36;letter-spacing:0.15px;"></span>
+        </div>
+      </div>
+      <!-- Search results -->
+      <div class="country-list" id="comune-list" data-multi="false" style="display:none;">
+      </div>
+    </div>
+    <div class="buttons-footer">
+      <button class="btn btn-back" data-action="back">
+        <span class="btn-icon">&#8249;</span> Indietro
+      </button>
+      <button class="btn btn-next disabled" data-action="next">
+        Avanti <span class="btn-icon">&#8250;</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 4: Attivita principale -->
+  <div class="step" data-step="4">
+    <div class="modal-bar">
+      <div class="modal-bar-header">
+        <span class="modal-bar-title">Su di te</span>
+        <button class="close-btn">&times;</button>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div>
+    </div>
+    <div class="body-content">
+      <div class="question-header">
+        <h2 class="question-title">Attivita principale</h2>
+        <p class="question-subtitle">Indica l'attivita che fai piu frequentemente, in base al tempo che le dedichi o al reddito che ti porta.</p>
+      </div>
+      <div class="options-list" data-single="true">
+        <div class="option-card" data-value="studio">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <div class="option-icon">&#128218;</div>
+            <span class="option-text">Studio</span>
+          </div>
+        </div>
+        <div class="option-card" data-value="lavoro">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <div class="option-icon">&#128188;</div>
+            <span class="option-text">Lavoro</span>
+          </div>
+        </div>
+        <div class="option-card" data-value="pensione">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <div class="option-icon">&#128240;</div>
+            <span class="option-text">Pensione</span>
+          </div>
+        </div>
+        <div class="option-card" data-value="casalinga">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <div class="option-icon">&#127968;</div>
+            <span class="option-text">Casalinga/o</span>
+          </div>
+        </div>
+        <div class="option-card" data-value="assistenza">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <div class="option-icon">&#129330;</div>
+            <span class="option-text">Assistenza a un familiare</span>
+          </div>
+          <button class="option-help">?</button>
+        </div>
+        <div class="option-card" data-value="disoccupato">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <div class="option-icon">&#9199;</div>
+            <span class="option-text">Senza occupazione</span>
+          </div>
+        </div>
+        <div class="option-card" data-value="altro_attivita">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <div class="option-icon">&#127843;</div>
+            <span class="option-text">Altro</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="buttons-footer">
+      <button class="btn btn-back" data-action="back">
+        <span class="btn-icon">&#8249;</span> Indietro
+      </button>
+      <button class="btn btn-next disabled" data-action="next">
+        Avanti <span class="btn-icon">&#8250;</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 5: Tipo di lavoro -->
+  <div class="step" data-step="5">
+    <div class="modal-bar">
+      <div class="modal-bar-header">
+        <span class="modal-bar-title">Su di te</span>
+        <button class="close-btn">&times;</button>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div>
+    </div>
+    <div class="body-content">
+      <div class="question-header">
+        <h2 class="question-title">Tipo di lavoro</h2>
+      </div>
+      <div class="options-list" data-single="true">
+        <div class="option-card" data-value="subordinato">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <span class="option-text">Subordinato (dipendente)</span>
+          </div>
+          <button class="option-help">?</button>
+        </div>
+        <div class="option-card" data-value="parasubordinato">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <span class="option-text">Parasubordinato (co.co.co., amministratore, sportivo)</span>
+          </div>
+          <button class="option-help">?</button>
+        </div>
+        <div class="option-card" data-value="autonomo">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <span class="option-text">Autonomo (con o senza partita IVA)</span>
+          </div>
+          <button class="option-help">?</button>
+        </div>
+        <div class="option-card" data-value="atipico">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <span class="option-text">Atipico (tirocinio, dottorato, voucher, ecc.)</span>
+          </div>
+          <button class="option-help">?</button>
+        </div>
+        <div class="option-card" data-value="altro_lavoro">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <span class="option-text">Altro</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="buttons-footer">
+      <button class="btn btn-back" data-action="back">
+        <span class="btn-icon">&#8249;</span> Indietro
+      </button>
+      <button class="btn btn-next disabled" data-action="next">
+        Avanti <span class="btn-icon">&#8250;</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 6: Tipo di contratto -->
+  <div class="step" data-step="6">
+    <div class="modal-bar">
+      <div class="modal-bar-header">
+        <span class="modal-bar-title">Su di te</span>
+        <button class="close-btn">&times;</button>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div>
+    </div>
+    <div class="body-content">
+      <div class="question-header">
+        <h2 class="question-title">Tipo di contratto</h2>
+      </div>
+      <div class="options-list" data-single="true">
+        <div class="option-card" data-value="indeterminato">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <div class="option-icon">&#128188;</div>
+            <span class="option-text">A tempo indeterminato</span>
+          </div>
+        </div>
+        <div class="option-card" data-value="determinato">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <div class="option-icon">&#128197;</div>
+            <span class="option-text">A tempo determinato</span>
+          </div>
+        </div>
+        <div class="option-card" data-value="apprendistato">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <div class="option-icon">&#129489;&#8205;&#127891;</div>
+            <span class="option-text">In apprendistato</span>
+          </div>
+          <button class="option-help">?</button>
+        </div>
+        <div class="option-card" data-value="intermittente">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <div class="option-icon">&#128222;</div>
+            <span class="option-text">Intermittente/a chiamata</span>
+          </div>
+          <button class="option-help">?</button>
+        </div>
+        <div class="option-card" data-value="altro_contratto">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <div class="option-icon">&#127843;</div>
+            <span class="option-text">Altro</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="buttons-footer">
+      <button class="btn btn-back" data-action="back">
+        <span class="btn-icon">&#8249;</span> Indietro
+      </button>
+      <button class="btn btn-next disabled" data-action="next">
+        Avanti <span class="btn-icon">&#8250;</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 60: Tipo contratto parasubordinato -->
+  <div class="step" data-step="60">
+    <div class="modal-bar">
+      <div class="modal-bar-header">
+        <span class="modal-bar-title">Su di te</span>
+        <button class="close-btn">&times;</button>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div>
+    </div>
+    <div class="body-content">
+      <div class="question-header">
+        <h2 class="question-title">Tipo di contratto</h2>
+      </div>
+      <div class="options-list" data-single="true">
+        <div class="option-card" data-value="co_co_co">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <span class="option-text">In collaborazione coordinata e continuativa (co.co.co.)</span>
+          </div>
+          <button class="option-help">?</button>
+        </div>
+        <div class="option-card" data-value="incarico_societario">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <span class="option-text">Amministratore/revisore/consigliere o altro incarico in societa/enti</span>
+          </div>
+          <button class="option-help">?</button>
+        </div>
+        <div class="option-card" data-value="sportivo_dilettantistico">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <span class="option-text">In collaborazione sportiva dilettantistica</span>
+          </div>
+          <button class="option-help">?</button>
+        </div>
+        <div class="option-card" data-value="altro_parasub">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <span class="option-text">Altro</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="buttons-footer">
+      <button class="btn btn-back" data-action="back">
+        <span class="btn-icon">&#8249;</span> Indietro
+      </button>
+      <button class="btn btn-next disabled" data-action="next">
+        Avanti <span class="btn-icon">&#8250;</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 61: Tipo lavoro autonomo -->
+  <div class="step" data-step="61">
+    <div class="modal-bar">
+      <div class="modal-bar-header">
+        <span class="modal-bar-title">Su di te</span>
+        <button class="close-btn">&times;</button>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div>
+    </div>
+    <div class="body-content">
+      <div class="question-header">
+        <h2 class="question-title">Tipo di lavoro autonomo</h2>
+      </div>
+      <div class="options-list" data-single="true">
+        <div class="option-card" data-value="professionista_albo">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <span class="option-text">Professionista con partita IVA iscritto ad albo</span>
+          </div>
+          <button class="option-help">?</button>
+        </div>
+        <div class="option-card" data-value="professionista_non_albo">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <span class="option-text">Professionista con partita IVA non iscritto ad albo</span>
+          </div>
+          <button class="option-help">?</button>
+        </div>
+        <div class="option-card" data-value="autonomo_occasionale">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <span class="option-text">Autonomo occasionale (senza partita IVA)</span>
+          </div>
+          <button class="option-help">?</button>
+        </div>
+        <div class="option-card" data-value="collaboratore_impresa_familiare">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <span class="option-text">Collaboratore in impresa familiare</span>
+          </div>
+          <button class="option-help">?</button>
+        </div>
+        <div class="option-card" data-value="altro_autonomo">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <span class="option-text">Altro</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="buttons-footer">
+      <button class="btn btn-back" data-action="back">
+        <span class="btn-icon">&#8249;</span> Indietro
+      </button>
+      <button class="btn btn-next disabled" data-action="next">
+        Avanti <span class="btn-icon">&#8250;</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 62: Tipo lavoro atipico -->
+  <div class="step" data-step="62">
+    <div class="modal-bar">
+      <div class="modal-bar-header">
+        <span class="modal-bar-title">Su di te</span>
+        <button class="close-btn">&times;</button>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div>
+    </div>
+    <div class="body-content">
+      <div class="question-header">
+        <h2 class="question-title">Tipo di lavoro atipico</h2>
+      </div>
+      <div class="options-list" data-single="true">
+        <div class="option-card" data-value="stage_tirocinio">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <span class="option-text">Stage o tirocinio</span>
+          </div>
+          <button class="option-help">?</button>
+        </div>
+        <div class="option-card" data-value="dottorato_specializzazione">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <span class="option-text">Dottorato/specializzazione con borsa di studio o contratto di formazione</span>
+          </div>
+          <button class="option-help">?</button>
+        </div>
+        <div class="option-card" data-value="libretto_famiglia_presto">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <span class="option-text">Libretto famiglia/PrestO (ex voucher)</span>
+          </div>
+          <button class="option-help">?</button>
+        </div>
+        <div class="option-card" data-value="altro_atipico">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <span class="option-text">Altro</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="buttons-footer">
+      <button class="btn btn-back" data-action="back">
+        <span class="btn-icon">&#8249;</span> Indietro
+      </button>
+      <button class="btn btn-next disabled" data-action="next">
+        Avanti <span class="btn-icon">&#8250;</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 63: Percorso di studi in corso -->
+  <div class="step" data-step="63">
+    <div class="modal-bar">
+      <div class="modal-bar-header">
+        <span class="modal-bar-title">Su di te</span>
+        <button class="close-btn">&times;</button>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div>
+    </div>
+    <div class="body-content">
+      <div class="question-header">
+        <h2 class="question-title">Percorso di studi in corso</h2>
+        <p class="question-subtitle">Seleziona il percorso di studi in corso, anche se svolto a casa con assistenza domiciliare (in caso di disabilita).</p>
+      </div>
+      <div class="options-list" data-single="true">
+        <div class="option-card" data-value="scuola_secondaria_secondo_grado">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <span class="option-text">Scuola superiore (secondaria di secondo grado)</span>
+          </div>
+        </div>
+        <div class="option-card" data-value="istruzione_superiore">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <span class="option-text">Universita o alta formazione (istruzione superiore)</span>
+          </div>
+        </div>
+        <div class="option-card" data-value="centri_provinciali_istruzione_adulti">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <span class="option-text">Centri Provinciali per l'Istruzione degli Adulti - CPIA</span>
+          </div>
+          <button class="option-help">?</button>
+        </div>
+      </div>
+    </div>
+    <div class="buttons-footer">
+      <button class="btn btn-back" data-action="back">
+        <span class="btn-icon">&#8249;</span> Indietro
+      </button>
+      <button class="btn btn-next disabled" data-action="next">
+        Avanti <span class="btn-icon">&#8250;</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 64: NASpI / DIS-COLL -->
+  <div class="step" data-step="64">
+    <div class="modal-bar">
+      <div class="modal-bar-header">
+        <span class="modal-bar-title">Su di te</span>
+        <button class="close-btn">&times;</button>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:60%"></div></div>
+    </div>
+    <div class="body-content">
+      <div class="question-header">
+        <h2 class="question-title">Stai percependo NASpI, DIS-COLL o Disoccupazione agricola?</h2>
+      </div>
+      <div class="options-list" data-single="true">
+        <div class="option-card" data-value="si_naspi">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <span class="option-text">Si</span>
+          </div>
+        </div>
+        <div class="option-card" data-value="no_naspi">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <span class="option-text">No</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="buttons-footer">
+      <button class="btn btn-back" data-action="back">
+        <span class="btn-icon">&#8249;</span> Indietro
+      </button>
+      <button class="btn btn-next disabled" data-action="next">
+        Avanti <span class="btn-icon">&#8250;</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 7: Invalidita civile -->
+  <div class="step" data-step="7">
+    <div class="modal-bar">
+      <div class="modal-bar-header">
+        <span class="modal-bar-title">Su di te</span>
+        <button class="close-btn">&times;</button>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:80%"></div></div>
+    </div>
+    <div class="body-content">
+      <div class="question-header-with-help">
+        <h2 class="question-title" style="flex:1">Hai un'invalidita civile certificata?</h2>
+        <button class="help-btn">?</button>
+      </div>
+      <div class="options-list" data-single="true">
+        <div class="option-card" data-value="si_invalidita">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <span class="option-text">Si</span>
+          </div>
+        </div>
+        <div class="option-card" data-value="no_invalidita">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <span class="option-text">No</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="buttons-footer">
+      <button class="btn btn-back" data-action="back">
+        <span class="btn-icon">&#8249;</span> Indietro
+      </button>
+      <button class="btn btn-next disabled" data-action="next">
+        Avanti <span class="btn-icon">&#8250;</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 8: Tipo di invalidita -->
+  <div class="step" data-step="8">
+    <div class="modal-bar">
+      <div class="modal-bar-header">
+        <span class="modal-bar-title">Su di te</span>
+        <button class="close-btn">&times;</button>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:80%"></div></div>
+    </div>
+    <div class="body-content">
+      <div class="question-header">
+        <h2 class="question-title">Tipo di invalidita</h2>
+        <p class="question-subtitle">Puoi selezionare anche piu di una risposta, se del caso.</p>
+      </div>
+      <div class="options-list" data-multi="true">
+        <div class="option-card" data-value="invalidita_percentuale">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <span class="option-text">Invalidita civile con %</span>
+          </div>
+        </div>
+        <div class="option-card" data-value="cieco">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <span class="option-text">Cieco civile</span>
+          </div>
+        </div>
+        <div class="option-card" data-value="sordo">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <span class="option-text">Sordo (ex sordomuto)</span>
+          </div>
+        </div>
+        <div class="option-card" data-value="non_autosufficiente">
+          <div class="option-card-inner">
+            <div class="option-check"><div class="check-icon"><svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div></div>
+            <span class="option-text">Senza autosufficienza</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="buttons-footer">
+      <button class="btn btn-back" data-action="back">
+        <span class="btn-icon">&#8249;</span> Indietro
+      </button>
+      <button class="btn btn-next disabled" data-action="next">
+        Avanti <span class="btn-icon">&#8250;</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 9: Percentuale di invalidita -->
+  <div class="step" data-step="9">
+    <div class="modal-bar">
+      <div class="modal-bar-header">
+        <span class="modal-bar-title">Su di te</span>
+        <button class="close-btn">&times;</button>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+    </div>
+    <div class="body-content">
+      <div class="question-header">
+        <h2 class="question-title">Percentuale di invalidita</h2>
+        <p class="question-subtitle">La trovi nel verbale dell'INPS (oppure, in passato, dell'ASL o della Commissione medica).</p>
+      </div>
+      <div class="number-input-container">
+        <input type="text" class="number-input" id="percentage-input" placeholder="Es: 33%" inputmode="numeric">
+      </div>
+    </div>
+    <div class="buttons-footer">
+      <button class="btn btn-back" data-action="back">
+        <span class="btn-icon">&#8249;</span> Indietro
+      </button>
+      <button class="btn btn-next disabled" data-action="next">
+        Avanti <span class="btn-icon">&#8250;</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- STEP 10: Done -->
+  <div class="step" data-step="10">
+    <div class="modal-bar">
+      <div class="modal-bar-header">
+        <span class="modal-bar-title">Su di te</span>
+        <button class="close-btn">&times;</button>
+      </div>
+      <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+    </div>
+    <div class="body-content" style="display:flex;align-items:center;justify-content:center;text-align:center;">
+      <div>
+        <div style="font-size:64px;margin-bottom:24px;">&#127881;</div>
+        <h2 class="question-title" style="margin-bottom:8px;">Grazie!</h2>
+        <p class="question-subtitle">Hai completato il test. Ogni tuo feedback ci sara utile per migliorare.</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  // Helper: generate flag emoji from ISO country code
+  function codeToFlag(code) {
+    return String.fromCodePoint(...[...code.toUpperCase()].map(c => 0x1F1E6 + c.charCodeAt(0) - 65));
+  }
+
+  // All countries (Italian names, ISO 3166-1 alpha-2 codes)
+  const countryData = [
+    ['Italia','it'],['Afghanistan','af'],['Albania','al'],['Algeria','dz'],['Andorra','ad'],
+    ['Angola','ao'],['Antigua e Barbuda','ag'],['Arabia Saudita','sa'],['Argentina','ar'],
+    ['Armenia','am'],['Australia','au'],['Austria','at'],['Azerbaigian','az'],['Bahamas','bs'],
+    ['Bahrein','bh'],['Bangladesh','bd'],['Barbados','bb'],['Belgio','be'],['Belize','bz'],
+    ['Benin','bj'],['Bhutan','bt'],['Bielorussia','by'],['Birmania (Myanmar)','mm'],
+    ['Bolivia','bo'],['Bosnia ed Erzegovina','ba'],['Botswana','bw'],['Brasile','br'],
+    ['Brunei','bn'],['Bulgaria','bg'],['Burkina Faso','bf'],['Burundi','bi'],['Cambogia','kh'],
+    ['Camerun','cm'],['Canada','ca'],['Capo Verde','cv'],['Ciad','td'],['Cile','cl'],
+    ['Cina','cn'],['Cipro','cy'],['Colombia','co'],['Comore','km'],['Corea del Nord','kp'],
+    ['Corea del Sud','kr'],['Costa Rica','cr'],['Costa d\'Avorio','ci'],['Croazia','hr'],
+    ['Cuba','cu'],['Danimarca','dk'],['Dominica','dm'],['Ecuador','ec'],['Egitto','eg'],
+    ['El Salvador','sv'],['Emirati Arabi Uniti','ae'],['Eritrea','er'],['Estonia','ee'],
+    ['Eswatini','sz'],['Etiopia','et'],['Figi','fj'],['Filippine','ph'],['Finlandia','fi'],
+    ['Francia','fr'],['Gabon','ga'],['Gambia','gm'],['Georgia','ge'],['Germania','de'],
+    ['Ghana','gh'],['Giamaica','jm'],['Giappone','jp'],['Gibuti','dj'],['Giordania','jo'],
+    ['Grecia','gr'],['Grenada','gd'],['Guatemala','gt'],['Guinea','gn'],
+    ['Guinea Equatoriale','gq'],['Guinea-Bissau','gw'],['Guyana','gy'],['Haiti','ht'],
+    ['Honduras','hn'],['India','in'],['Indonesia','id'],['Iran','ir'],['Iraq','iq'],
+    ['Irlanda','ie'],['Islanda','is'],['Isole Marshall','mh'],['Isole Salomone','sb'],
+    ['Israele','il'],['Kazakhstan','kz'],['Kenya','ke'],['Kirghizistan','kg'],
+    ['Kiribati','ki'],['Kuwait','kw'],['Laos','la'],['Lesotho','ls'],['Lettonia','lv'],
+    ['Libano','lb'],['Liberia','lr'],['Libia','ly'],['Liechtenstein','li'],['Lituania','lt'],
+    ['Lussemburgo','lu'],['Madagascar','mg'],['Malawi','mw'],['Malaysia','my'],
+    ['Maldive','mv'],['Mali','ml'],['Malta','mt'],['Marocco','ma'],['Mauritania','mr'],
+    ['Mauritius','mu'],['Messico','mx'],['Micronesia','fm'],['Moldavia','md'],['Monaco','mc'],
+    ['Mongolia','mn'],['Montenegro','me'],['Mozambico','mz'],['Namibia','na'],['Nauru','nr'],
+    ['Nepal','np'],['Nicaragua','ni'],['Niger','ne'],['Nigeria','ng'],['Norvegia','no'],
+    ['Nuova Zelanda','nz'],['Oman','om'],['Paesi Bassi','nl'],['Pakistan','pk'],['Palau','pw'],
+    ['Panama','pa'],['Papua Nuova Guinea','pg'],['Paraguay','py'],['Peru','pe'],
+    ['Polonia','pl'],['Portogallo','pt'],['Qatar','qa'],
+    ['Regno Unito','gb'],['Repubblica Ceca','cz'],['Repubblica Centrafricana','cf'],
+    ['Repubblica del Congo','cg'],['Repubblica Democratica del Congo','cd'],
+    ['Repubblica Dominicana','do'],['Romania','ro'],['Ruanda','rw'],['Russia','ru'],
+    ['Saint Kitts e Nevis','kn'],['Saint Lucia','lc'],['Saint Vincent e Grenadine','vc'],
+    ['Samoa','ws'],['San Marino','sm'],['Sao Tome e Principe','st'],['Senegal','sn'],
+    ['Serbia','rs'],['Seychelles','sc'],['Sierra Leone','sl'],['Singapore','sg'],
+    ['Siria','sy'],['Slovacchia','sk'],['Slovenia','si'],['Somalia','so'],['Spagna','es'],
+    ['Sri Lanka','lk'],['Stati Uniti','us'],['Sudafrica','za'],['Sudan','sd'],
+    ['Sudan del Sud','ss'],['Suriname','sr'],['Svezia','se'],['Svizzera','ch'],
+    ['Tagikistan','tj'],['Tanzania','tz'],['Thailandia','th'],['Timor Est','tl'],
+    ['Togo','tg'],['Tonga','to'],['Trinidad e Tobago','tt'],['Tunisia','tn'],
+    ['Turchia','tr'],['Turkmenistan','tm'],['Tuvalu','tv'],['Ucraina','ua'],['Uganda','ug'],
+    ['Ungheria','hu'],['Uruguay','uy'],['Uzbekistan','uz'],['Vanuatu','vu'],
+    ['Citta del Vaticano','va'],['Venezuela','ve'],['Vietnam','vn'],['Yemen','ye'],
+    ['Zambia','zm'],['Zimbabwe','zw']
+  ];
+
+  // Italia first, then alphabetical
+  const countries = countryData.map(([name, code]) => ({ name, flag: codeToFlag(code), code }));
+
+  const comuni = [
+    'Milano', 'Roma', 'Napoli', 'Torino', 'Palermo', 'Genova', 'Bologna',
+    'Firenze', 'Bari', 'Catania', 'Venezia', 'Verona', 'Messina', 'Padova',
+    'Trieste', 'Taranto', 'Brescia', 'Parma', 'Prato', 'Modena',
+    'Reggio Calabria', 'Reggio Emilia', 'Perugia', 'Ravenna', 'Livorno',
+    'Cagliari', 'Foggia', 'Rimini', 'Salerno', 'Ferrara', 'Sassari',
+    'Latina', 'Giugliano in Campania', 'Monza', 'Siracusa', 'Pescara',
+    'Bergamo', 'Forlì', 'Trento', 'Vicenza', 'Terni', 'Bolzano',
+    'Novara', 'Piacenza', 'Ancona', 'Andria', 'Arezzo', 'Udine',
+    'Cesena', 'Lecce', 'Abbano Terme', 'Abbadia San Salvatore',
+    'Abbiategrasso', 'Acerra', 'Albano Laziale', 'Alessandria',
+    'Aosta', 'Assisi', 'Brindisi',
+  ];
+
+  // State
+  let currentStep = 1;
+  const selections = {};
+  const countrySelections = { citizenship: new Set(), residence: new Set() };
+  let comuneSelection = '';
+
+  // Render country/comune lists
+  function renderList(containerId, items, searchId, isCountry = true) {
+    const container = document.getElementById(containerId);
+    const isMulti = container.dataset.multi === 'true';
+
+    function render(filter = '') {
+      const filtered = items.filter(item => {
+        const name = isCountry ? item.name : item;
+        return name.toLowerCase().includes(filter.toLowerCase());
+      });
+
+      container.innerHTML = filtered.map(item => {
+        const name = isCountry ? item.name : item;
+        const selSet = containerId === 'country-list' ? countrySelections.citizenship :
+                       containerId === 'residence-list' ? countrySelections.residence : null;
+        const isSelected = selSet ? selSet.has(name) : comuneSelection === name;
+
+        return `<div class="country-item ${isSelected ? 'selected' : ''}" data-name="${name}">
+          <div class="country-check">
+            <div class="check-icon"><svg viewBox="0 0 24 24" style="width:10px;height:10px;fill:white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+          </div>
+          ${isCountry ? `<div class="country-flag">${item.flag}</div>` : ''}
+          <span class="country-name">${name}</span>
+        </div>`;
+      }).join('');
+
+      // Bind clicks
+      container.querySelectorAll('.country-item').forEach(el => {
+        el.addEventListener('click', () => {
+          const name = el.dataset.name;
+
+          if (containerId === 'country-list') {
+            if (countrySelections.citizenship.has(name)) {
+              countrySelections.citizenship.delete(name);
+            } else {
+              countrySelections.citizenship.add(name);
+            }
+          } else if (containerId === 'residence-list') {
+            countrySelections.residence.clear();
+            countrySelections.residence.add(name);
+          } else {
+            comuneSelection = name;
+          }
+
+          render(document.getElementById(searchId).value);
+          updateNextButton();
+        });
+      });
+    }
+
+    render();
+
+    document.getElementById(searchId).addEventListener('input', (e) => {
+      render(e.target.value);
+    });
+  }
+
+  // Initialize lists
+  renderList('country-list', countries, 'search-country', true);
+  renderList('residence-list', countries, 'search-residence', true);
+
+  // Comune: custom behavior — empty state, type-to-search, click-to-select
+  (function initComune() {
+    const searchInput = document.getElementById('search-comune');
+    const emptyState = document.getElementById('comune-empty-state');
+    const selectedDiv = document.getElementById('comune-selected');
+    const selectedName = document.getElementById('comune-selected-name');
+    const listContainer = document.getElementById('comune-list');
+
+    function renderComuneResults(filter) {
+      if (!filter || filter.length < 1) {
+        listContainer.style.display = 'none';
+        emptyState.style.display = comuneSelection ? 'none' : 'flex';
+        selectedDiv.style.display = comuneSelection ? 'block' : 'none';
+        return;
+      }
+
+      emptyState.style.display = 'none';
+      selectedDiv.style.display = 'none';
+
+      const filtered = comuni.filter(c => c.toLowerCase().includes(filter.toLowerCase()));
+      if (filtered.length === 0) {
+        listContainer.style.display = 'none';
+        return;
+      }
+
+      listContainer.style.display = 'flex';
+      listContainer.innerHTML = filtered.map(name =>
+        `<div class="country-item${comuneSelection === name ? ' selected' : ''}" data-name="${name}" style="border:1px solid ${comuneSelection === name ? 'rgba(23,31,54,0.3)' : 'transparent'};${comuneSelection === name ? 'background:#f9fafa;' : ''}">
+          <div class="country-check" ${comuneSelection === name ? 'style="display:flex"' : ''}>
+            <div class="check-icon"><svg viewBox="0 0 24 24" style="width:10px;height:10px;fill:white"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg></div>
+          </div>
+          <span class="country-name">${name}</span>
+        </div>`
+      ).join('');
+
+      listContainer.querySelectorAll('.country-item').forEach(el => {
+        el.addEventListener('click', () => {
+          comuneSelection = el.dataset.name;
+          searchInput.value = '';
+          listContainer.style.display = 'none';
+          emptyState.style.display = 'none';
+          selectedDiv.style.display = 'block';
+          selectedName.textContent = comuneSelection;
+          updateNextButton();
+        });
+      });
+    }
+
+    searchInput.addEventListener('input', (e) => {
+      renderComuneResults(e.target.value);
+    });
+
+    // Allow deselecting by clicking the selected item
+    selectedDiv.addEventListener('click', () => {
+      comuneSelection = '';
+      selectedDiv.style.display = 'none';
+      emptyState.style.display = 'flex';
+      searchInput.value = '';
+      searchInput.focus();
+      updateNextButton();
+    });
+  })();
+
+  // Option card clicks (single select)
+  document.querySelectorAll('.options-list[data-single="true"]').forEach(list => {
+    list.querySelectorAll('.option-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.option-help')) return;
+        list.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+        card.classList.add('selected');
+        const step = card.closest('.step').dataset.step;
+        selections[step] = card.dataset.value;
+        updateNextButton();
+      });
+    });
+  });
+
+  // Option card clicks (multi select for invalidita)
+  document.querySelectorAll('.options-list[data-multi="true"]').forEach(list => {
+    list.querySelectorAll('.option-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        if (e.target.closest('.option-help')) return;
+        card.classList.toggle('selected');
+        const step = card.closest('.step').dataset.step;
+        const selected = list.querySelectorAll('.option-card.selected');
+        selections[step] = selected.length > 0 ? Array.from(selected).map(c => c.dataset.value) : null;
+        updateNextButton();
+      });
+    });
+  });
+
+  // Percentage input
+  const percentInput = document.getElementById('percentage-input');
+  percentInput.addEventListener('input', () => {
+    const val = percentInput.value.replace(/[^0-9]/g, '');
+    if (val) {
+      percentInput.value = val + '%';
+      selections['9'] = val;
+    } else {
+      percentInput.value = '';
+      delete selections['9'];
+    }
+    updateNextButton();
+  });
+
+  // Update next button state
+  function updateNextButton() {
+    const step = document.querySelector('.step.active');
+    const stepNum = parseInt(step.dataset.step);
+    const nextBtn = step.querySelector('.btn-next');
+    if (!nextBtn) return;
+
+    let hasSelection = false;
+
+    if (stepNum === 1) {
+      hasSelection = countrySelections.citizenship.size > 0;
+    } else if (stepNum === 2) {
+      hasSelection = countrySelections.residence.size > 0;
+    } else if (stepNum === 3) {
+      hasSelection = comuneSelection !== '';
+    } else if (stepNum === 9) {
+      hasSelection = !!selections['9'];
+    } else if (stepNum === 99) {
+      hasSelection = !!selections['99'];
+    } else {
+      hasSelection = !!selections[stepNum];
+    }
+
+    if (hasSelection) {
+      nextBtn.classList.remove('disabled');
+    } else {
+      nextBtn.classList.add('disabled');
+    }
+  }
+
+  // Navigation
+  // Activity branching map from drawio:
+  // Step 4 (attivita): studio->63, lavoro->5, disoccupato->64, others->7
+  // Step 5 (tipo lavoro): subordinato->6, parasubordinato->60, autonomo->61, atipico->62, altro->7
+  // Steps 6,60,61,62,63,64 all -> 7 (invalidita)
+
+  function getNextStep(current) {
+    // Step 4: branch based on activity type
+    if (current === 4) {
+      const v = selections['4'];
+      if (v === 'lavoro') return 5;
+      if (v === 'studio') return 63;
+      if (v === 'disoccupato') return 64;
+      return 7; // pensione, casalinga, assistenza, altro -> invalidita
+    }
+    // Step 5: branch based on employment type
+    if (current === 5) {
+      const v = selections['5'];
+      if (v === 'subordinato') return 6;
+      if (v === 'parasubordinato') return 60;
+      if (v === 'autonomo') return 61;
+      if (v === 'atipico') return 62;
+      return 7; // altro -> invalidita
+    }
+    // All sub-activity steps go to invalidita
+    if ([6, 60, 61, 62, 63, 64].includes(current)) return 7;
+    // Step 7 (invalidita): if "no", skip to intent (step 99)
+    if (current === 7 && selections['7'] === 'no_invalidita') return 99;
+    // Step 8 (tipo invalidita): if includes "invalidita_percentuale", go to step 9
+    if (current === 8) {
+      const sel = selections['8'];
+      if (sel && sel.includes('invalidita_percentuale')) return 9;
+      return 99;
+    }
+    // Step 9 (percentuale) -> intent
+    if (current === 9) return 99;
+    // Step 99 (intent) -> done
+    if (current === 99) return 10;
+    return current + 1;
+  }
+
+  function getPrevStep(current) {
+    // From intent (99), go back to the last invalidita-related step
+    if (current === 99) {
+      if (selections['7'] === 'no_invalidita') return 7;
+      const sel8 = selections['8'];
+      if (sel8 && sel8.includes('invalidita_percentuale')) return 9;
+      if (sel8) return 8;
+      return 7;
+    }
+    if (current === 10) return 99;
+    // Back from invalidita: return to the correct sub-activity or activity step
+    if (current === 7) {
+      const act = selections['4'];
+      if (act === 'lavoro') {
+        const emp = selections['5'];
+        if (emp === 'subordinato') return 6;
+        if (emp === 'parasubordinato') return 60;
+        if (emp === 'autonomo') return 61;
+        if (emp === 'atipico') return 62;
+        return 5; // altro_lavoro
+      }
+      if (act === 'studio') return 63;
+      if (act === 'disoccupato') return 64;
+      return 4; // pensione, casalinga, etc.
+    }
+    // Back from sub-activity contract steps -> tipo di lavoro
+    if ([6, 60, 61, 62].includes(current)) return 5;
+    // Back from studio/unemployment -> attivita
+    if (current === 63 || current === 64) return 4;
+    return current - 1;
+  }
+
+  function goToStep(stepNum) {
+    document.querySelectorAll('.step').forEach(s => s.classList.remove('active'));
+    const target = document.querySelector(`.step[data-step="${stepNum}"]`);
+    if (target) {
+      target.classList.add('active');
+      currentStep = stepNum;
+      updateNextButton();
+      // Scroll body to top
+      const body = target.querySelector('.body-content');
+      if (body) body.scrollTop = 0;
+    }
+  }
+
+  // Button event delegation
+  document.getElementById('app').addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-action]');
+    if (!btn) return;
+    if (btn.classList.contains('disabled')) return;
+
+    const action = btn.dataset.action;
+    if (action === 'next') {
+      const next = getNextStep(currentStep);
+      goToStep(next);
+    } else if (action === 'back') {
+      const prev = getPrevStep(currentStep);
+      goToStep(prev);
+    }
+  });
+
+  // Initialize
+  updateNextButton();
+</script>
+
+</body>
+</html>
